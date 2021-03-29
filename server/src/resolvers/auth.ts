@@ -10,6 +10,7 @@ import {
 import { User } from '../entities/User';
 import { MyContext } from '../types';
 import bcrypt from 'bcrypt';
+import { registerValidator } from '../utils/validators';
 
 @InputType()
 class UsernamePasswordInput {
@@ -37,12 +38,40 @@ class UserResponse {
 }
 
 @Resolver()
-export class UserResolver {
-  @Mutation(() => User)
+export class AuthResolver {
+  @Mutation(() => UserResponse)
   async createUser(
     @Arg('options') options: UsernamePasswordInput,
     @Ctx() { em }: MyContext
-  ): Promise<User> {
+  ): Promise<UserResponse> {
+    const { errors, valid } = registerValidator(
+      options.username,
+      options.password
+    );
+
+    if (!valid) {
+      return {
+        errors: [
+          {
+            field: 'status',
+            message: Object.values(errors)[0],
+          },
+        ],
+      };
+    }
+
+    const existingUser = await em.findOne(User, { username: options.username });
+    if (existingUser) {
+      return {
+        errors: [
+          {
+            field: 'status',
+            message: `Username ${options.username} is already taken.`,
+          },
+        ],
+      };
+    }
+
     const hashRounds = 10;
     const hashedPassword = await bcrypt.hash(options.password, hashRounds);
     const user = em.create(User, {
@@ -50,7 +79,7 @@ export class UserResolver {
       password: hashedPassword,
     });
     await em.persistAndFlush(user);
-    return user;
+    return { user };
   }
 
   @Mutation(() => UserResponse)
