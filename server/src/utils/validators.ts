@@ -42,6 +42,6 @@ export const loginValidator = (username: string, password: string) => {
 
   return {
     errors,
-    valid: Object.keys(errors).length < 1,
+    valid: Object.keys(errors).length == 0,
   };
 };
