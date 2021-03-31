@@ -3,6 +3,7 @@ import {
   Field,
   InputType,
   Resolver,
+  Query,
   Mutation,
   Ctx,
   ObjectType,
@@ -39,10 +40,19 @@ class UserResponse {
 
 @Resolver()
 export class AuthResolver {
+  @Query(() => User, { nullable: true })
+  async about(@Ctx() { em, req }: MyContext) {
+    if (!req.session.userId) {
+      return null;
+    }
+    const user = await em.findOne(User, { id: req.session.userId });
+    return user;
+  }
+
   @Mutation(() => UserResponse)
   async createUser(
     @Arg('options') options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const { errors, valid } = registerValidator(
       options.username,
@@ -79,6 +89,7 @@ export class AuthResolver {
       password: hashedPassword,
     });
     await em.persistAndFlush(user);
+    req.session.userId = user.id;
     return { user };
   }
 
