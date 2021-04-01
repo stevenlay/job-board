@@ -1,6 +1,6 @@
 interface AuthErrors {
-  username?: string;
-  password?: string;
+  field?: string;
+  message?: string;
 }
 
 export const registerValidator = (username: string, password: string) => {
@@ -12,15 +12,18 @@ export const registerValidator = (username: string, password: string) => {
     username.length > 20 ||
     username.length < 3
   ) {
-    errors.username = 'Username must be in range of 3-20 characters length.';
+    errors.field = 'username';
+    errors.message = 'Username must be in range of 3-20 characters length.';
   }
 
   if (!/^[a-zA-Z0-9-_]*$/.test(username)) {
-    errors.username = 'Username must have alphanumeric characters only.';
+    errors.field = 'username';
+    errors.message = 'Username must have alphanumeric characters only.';
   }
 
   if (!password || password.length < 6) {
-    errors.password = 'Password must be atleast 6 characters long.';
+    errors.field = 'password';
+    errors.message = 'Password must be atleast 6 characters long.';
   }
 
   return {
@@ -33,11 +36,13 @@ export const loginValidator = (username: string, password: string) => {
   const errors: AuthErrors = {};
 
   if (!username || username.trim() === '') {
-    errors.username = 'Username field must not be empty.';
+    errors.field = 'username';
+    errors.message = 'Username field must not be empty.';
   }
 
   if (!password) {
-    errors.password = 'Password field must not be empty.';
+    errors.field = password;
+    errors.message = 'Password field must not be empty.';
   }
 
   return {

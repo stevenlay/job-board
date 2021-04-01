@@ -24,9 +24,9 @@ class UsernamePasswordInput {
 @ObjectType()
 class FieldError {
   @Field()
-  field: string;
+  field?: string;
   @Field()
-  message: string;
+  message?: string;
 }
 
 @ObjectType()
@@ -63,8 +63,8 @@ export class AuthResolver {
       return {
         errors: [
           {
-            field: 'status',
-            message: Object.values(errors)[0],
+            field: errors.field,
+            message: errors.message,
           },
         ],
       };
@@ -75,7 +75,7 @@ export class AuthResolver {
       return {
         errors: [
           {
-            field: 'status',
+            field: 'username',
             message: `Username ${options.username} is already taken.`,
           },
         ],
@@ -104,7 +104,7 @@ export class AuthResolver {
         errors: [
           {
             field: 'username',
-            message: 'username does not exist',
+            message: 'Username does not exist.',
           },
         ],
       };
@@ -115,7 +115,7 @@ export class AuthResolver {
         errors: [
           {
             field: 'password',
-            message: 'password incorrect',
+            message: 'Password is incorrect.',
           },
         ],
       };
